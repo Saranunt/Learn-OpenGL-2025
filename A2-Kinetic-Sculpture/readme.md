@@ -2,5 +2,5 @@
 
 This project explores motion and form through a kinetic sculpture built with OpenGL, showcasing animation, transformation, and lighting techniques.
 
-Demo Video:
-https://youtu.be/RWVlVaUbM98
+Preview Video:  
+[Watch on YouTube](https://youtu.be/RWVlVaUbM98)
