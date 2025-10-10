@@ -19,7 +19,7 @@ void main()
         
         // Apply brown tint to the texture
         vec3 brownTint = vec3(1.0f, 1.0f, 1.0f); // Brown color
-        vec3 tintedColor = boxColor.rgb * brownTint; //
+        vec3 tintedColor = brownTint; // boxColor.rgb *
         
         // Simple lighting for box
          vec3 lightDir = normalize(vec3(1.0f, 1.0f, 1.0f));

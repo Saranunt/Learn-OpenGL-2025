@@ -293,10 +293,10 @@ int main()
         std::cout << "Failed to load block texture" << std::endl;
         // Fallback to brown solid color if texture fails to load
         unsigned char brownData[] = {
-            139, 69, 19, 255,   // Brown
-            160, 82, 45, 255,   // Saddle Brown
-            101, 67, 33, 255,   // Dark Brown
-            160, 82, 45, 255    // Saddle Brown
+            230, 230, 230, 255,   
+            230, 230, 230, 255,   
+            230, 230, 230, 255, 
+            230, 230, 230, 255,
         };
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, brownData);
     }
