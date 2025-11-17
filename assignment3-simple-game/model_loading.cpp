@@ -13,6 +13,8 @@
 
 #include <iostream>
 #include <cmath>
+#include <vector>
+#include <random>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -20,8 +22,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -30,11 +32,14 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 // plane state
-glm::vec3 planePosition(0.0f, 2.0f, 0.0f);
+glm::vec3 planePosition(100.0f, 26.0f, 0.0f);
 float planePitch = 0.0f;  // rotation around X axis (nose up/down)
 float planeYaw = 0.0f;    // rotation around Y axis (left/right)
 float planeRoll = 0.0f;   // rotation around Z axis (banking)
 float planeSpeed = 5.0f;  // units per second
+
+// islands
+std::vector<glm::vec3> islandPositions;
 
 // timing
 float deltaTime = 0.0f;
@@ -127,10 +132,29 @@ int main()
     // build and compile shaders
     // -------------------------
     Shader ourShader("1.model_loading.vs", "1.model_loading.fs");
+    
 
     // load models
     // -----------
     Model ourModel(FileSystem::getPath("resources/objects/plane/plane.dae"));
+    //stbi_set_flip_vertically_on_load(true);
+    Model islandModel(FileSystem::getPath("resources/objects/island4/Untitled.dae"));
+    
+    // Randomly place extra islands (2 or 3) in the world
+    islandPositions.clear();
+    islandPositions.push_back(glm::vec3(0.0f, 26.0f, 0.0f)); // original island
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> islandCountDist(2, 3);
+    std::uniform_real_distribution<float> horizontalDist(-1500.0f, 1500.0f);
+    std::uniform_real_distribution<float> heightDist(26.0f, 26.0f);
+    
+    int extraIslands = islandCountDist(gen);
+    islandPositions.reserve(1 + extraIslands);
+    for (int i = 0; i < extraIslands; ++i)
+    {
+        islandPositions.emplace_back(horizontalDist(gen), heightDist(gen), horizontalDist(gen));
+    }
     
     // load and create texture for ground
     // ----------------------------------
@@ -260,6 +284,27 @@ int main()
         glBindVertexArray(groundVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
+        
+        // Unbind wave texture so island model doesn't use it
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // Render island model
+        // -------------------
+        ourShader.use();
+        ourShader.setMat4("projection", projection);
+        ourShader.setMat4("view", view);
+        
+        // Island transforms: draw the main island and the randomly placed ones
+        for (const auto& islandPos : islandPositions)
+        {
+            glm::mat4 islandModelMatrix = glm::mat4(1.0f);
+            islandModelMatrix = glm::translate(islandModelMatrix, islandPos);
+            islandModelMatrix = glm::rotate(islandModelMatrix, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+            islandModelMatrix = glm::scale(islandModelMatrix, glm::vec3(500.0f, 500.0f, 500.0f));
+            ourShader.setMat4("model", islandModelMatrix);
+            islandModel.Draw(ourShader);
+        }
 
         // Render plane model
         // ------------------
@@ -308,6 +353,7 @@ void processInput(GLFWwindow *window)
 
     // Plane rotation controls
     float rotationSpeed = 10.0f; // degrees per second
+    float acceleration = 10.0f;  // units per second^2 for speed control
     
     // W/S: Pitch (nose up/down)
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -332,6 +378,14 @@ void processInput(GLFWwindow *window)
     // Clamp roll to reasonable limits
     if (planeRoll > 45.0f) planeRoll = 45.0f;
     if (planeRoll < -45.0f) planeRoll = -45.0f;
+
+    // Z / X: adjust speed (forward velocity)
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        planeSpeed += acceleration * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+        planeSpeed -= acceleration * deltaTime;
+    if (planeSpeed < 1.0f) planeSpeed = 1.0f;
+    if (planeSpeed > 50.0f) planeSpeed = 50.0f;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
