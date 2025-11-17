@@ -1,4 +1,4 @@
 # Simple Plane Game
 
-https://github.com/user-attachments/assets/740b27fe-968f-421e-a859-f6ef2c526f76
+https://github.com/user-attachments/assets/552dd31f-ed78-4c22-b6e5-6ee4aa2b95b7
 
