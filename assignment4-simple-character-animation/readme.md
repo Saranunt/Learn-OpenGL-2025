@@ -1,5 +1,9 @@
 # Simple Character Animation
 
+
+https://github.com/user-attachments/assets/28c24256-9efc-4935-a847-2eb810116438
+
+
 ## Overview
 
 Small third-person skeletal animation demo demonstrating animation blending, root-motion sampling, and a simple third-person orbit camera.**The character model remains at the origin while the ground plane is moved to simulate locomotion.**
